@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracker Alumni SMA</title>
+  <style>
+    :root {
+      --navy: #183153;
+      --blue: #2563eb;
+      --bg: #f3f6fb;
+      --line: #dbe3ee;
+      --muted: #64748b;
+      --ink: #172033;
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    header {
+      padding: 32px 20px;
+      color: white;
+      background: linear-gradient(120deg, #183153, #2563eb);
+    }
+
+    header h1 { margin: 0 0 5px; font-size: clamp(1.7rem, 4vw, 2.3rem); }
+    header p { margin: 0; color: #dbeafe; }
+    main { width: min(1120px, calc(100% - 32px)); margin: 24px auto 48px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 390px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      padding: 22px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 5px 18px #1720330a;
+    }
+
+    h2 { margin: 0 0 18px; font-size: 1.2rem; }
+    h3 { margin: 16px 0 10px; color: var(--navy); font-size: 1rem; }
+    .field { margin-bottom: 14px; }
+    label { display: block; margin-bottom: 6px; font-weight: 650; font-size: .9rem; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      color: var(--ink);
+      background: white;
+      font: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 3px solid #bfdbfe;
+      border-color: var(--blue);
+    }
+
+    textarea { min-height: 78px; resize: vertical; }
+
+    .conditional {
+      margin: 12px 0 16px;
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    [hidden] { display: none !important; }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+    }
+
+    .check-row input { width: auto; margin: 5px 0 0; }
+    .check-row label { margin: 0; font-weight: 500; }
+
+    button {
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .primary { width: 100%; color: white; background: var(--blue); }
+    .primary:hover { background: #1d4ed8; }
+    .secondary { color: var(--navy); background: #eff6ff; }
+    .delete { padding: 6px 9px; color: #b91c1c; background: #fef2f2; font-size: .82rem; }
+
+    .toolbar { display: flex; gap: 10px; margin-bottom: 12px; }
+    .toolbar input { flex: 1; }
+    .stats { margin: 0 0 12px; color: var(--muted); font-size: .9rem; }
+    .table-wrap { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 10px 9px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-size: .78rem; text-transform: uppercase; }
+    td { font-size: .9rem; }
+    .empty { padding: 28px 10px; color: var(--muted); text-align: center; }
+    .privacy { margin: 18px 0 0; padding: 12px; color: #475569; background: #f8fafc; border-radius: 8px; font-size: .82rem; }
+
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .card { padding: 17px; }
+      .toolbar { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tracker Alumni SMA</h1>
+    <p>Rekap pendidikan dan kegiatan siswa setelah lulus.</p>
+  </header>
+
+  <main>
+    <div class="layout">
+      <section class="card">
+        <h2>Formulir Alumni</h2>
+
+        <form id="alumniForm">
+          <div class="field">
+            <label for="nama">Nama siswa *</label>
+            <input id="nama" name="nama" required autocomplete="name" placeholder="Nama lengkap">
+          </div>
+
+          <div class="field">
+            <label for="kelas">Kelas *</label>
+            <input id="kelas" name="kelas" required placeholder="Contoh: XII IPA 1">
+          </div>
+
+          <div class="field">
+            <label for="tahun">Tahun lulus *</label>
+            <input id="tahun" name="tahun" type="number" min="1990" max="2100" required placeholder="Contoh: 2025">
+          </div>
+
+          <div class="field">
+            <label for="kegiatan">Kegiatan utama saat ini *</label>
+            <select id="kegiatan" name="kegiatan" required>
+              <option value="">Pilih kegiatan</option>
+              <option>Kuliah</option>
+              <option>Kerja</option>
+              <option>Sekolah kedinasan</option>
+              <option>AKMIL</option>
+              <option>AKPOL</option>
+              <option>Kegiatan lain</option>
+            </select>
+          </div>
+
+          <section id="kuliahFields" class="conditional" hidden>
+            <h3>Informasi kuliah</h3>
+            <div class="field">
+              <label for="universitas">Universitas/perguruan tinggi</label>
+              <input id="universitas" name="universitas" placeholder="Nama universitas">
+            </div>
+            <div class="field">
+              <label for="jurusanKuliah">Jurusan</label>
+              <input id="jurusanKuliah" name="jurusanKuliah" placeholder="Nama jurusan">
+            </div>
+            <div class="field">
+              <label for="jenjangKuliah">Jenjang</label>
+              <select id="jenjangKuliah" name="jenjangKuliah">
+                <option value="">Pilih jenjang</option>
+                <option>S1</option>
+                <option>D4</option>
+                <option>D3</option>
+              </select>
+            </div>
+          </section>
+
+          <section id="kerjaFields" class="conditional" hidden>
+            <h3>Informasi pekerjaan</h3>
+            <div class="field">
+              <label for="pekerjaan">Pekerjaan saat ini</label>
+              <input id="pekerjaan" name="pekerjaan" placeholder="Jenis pekerjaan">
+            </div>
+            <div class="field">
+              <label for="tempatKerja">Nama tempat kerja (opsional)</label>
+              <input id="tempatKerja" name="tempatKerja" placeholder="Perusahaan/instansi">
+            </div>
+          </section>
+
+          <section id="dinasFields" class="conditional" hidden>
+            <h3>Informasi sekolah kedinasan</h3>
+            <div class="field">
+              <label for="sekolahDinas">Nama sekolah kedinasan</label>
+              <input id="sekolahDinas" name="sekolahDinas" placeholder="Nama sekolah kedinasan">
+            </div>
+            <div class="field">
+              <label for="jurusanDinas">Jurusan</label>
+              <input id="jurusanDinas" name="jurusanDinas" placeholder="Jurusan yang diambil">
+            </div>
+            <div class="field">
+              <label for="jenjangDinas">Jenjang</label>
+              <select id="jenjangDinas" name="jenjangDinas">
+                <option value="">Pilih jenjang</option>
+                <option>D3</option>
+                <option>D4</option>
+              </select>
+            </div>
+          </section>
+
+          <section id="akademiFields" class="conditional" hidden>
+            <h3>Informasi AKMIL/AKPOL</h3>
+            <div class="field">
+              <label for="akademi">Akademi/sekolah</label>
+              <input id="akademi" name="akademi" placeholder="Nama akademi/sekolah">
+            </div>
+            <div class="field">
+              <label for="bidangAkademi">Jurusan atau bidang</label>
+              <input id="bidangAkademi" name="bidangAkademi" placeholder="Jurusan/bidang yang diambil">
+            </div>
+          </section>
+
+          <section id="lainFields" class="conditional" hidden>
+            <h3>Kegiatan lain</h3>
+            <div class="field">
+              <label for="kegiatanLain">Kegiatan yang dijalani</label>
+              <textarea id="kegiatanLain" name="kegiatanLain" placeholder="Jelaskan kegiatan saat ini"></textarea>
+            </div>
+          </section>
+
+          <section class="conditional">
+            <h3>Penerimaan PTN melalui SNBP/SNBT</h3>
+            <div class="field check-row">
+              <input id="tidakDiambil" name="tidakDiambil" type="checkbox">
+              <label for="tidakDiambil">Tidak mengambil PTN yang sudah resmi menerima siswa melalui SNBP/SNBT.</label>
+            </div>
+
+            <div id="ptnFields" hidden>
+              <div class="field">
+                <label for="namaPTN">Nama kampus/PTN</label>
+                <input id="namaPTN" name="namaPTN" placeholder="Nama kampus yang menerima">
+              </div>
+              <div class="field">
+                <label for="jurusanPTN">Jurusan yang diterima</label>
+                <input id="jurusanPTN" name="jurusanPTN" placeholder="Nama jurusan">
+              </div>
+              <div class="field">
+                <label for="alasanPTN">Alasan tidak diambil</label>
+                <textarea id="alasanPTN" name="alasanPTN" placeholder="Jelaskan alasannya"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <div class="field">
+            <label for="kegiatanTambahan">Kegiatan lain yang sedang dijalani (opsional)</label>
+            <textarea id="kegiatanTambahan" name="kegiatanTambahan" placeholder="Contoh: kursus, usaha, relawan, persiapan seleksi"></textarea>
+          </div>
+
+          <button class="primary" type="submit">Simpan data</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Rekap Data Alumni</h2>
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="Cari nama, kelas, kampus, atau kegiatan..." aria-label="Cari data alumni">
+          <button id="exportButton" class="secondary" type="button">Ekspor CSV</button>
+        </div>
+
+        <p id="count" class="stats"></p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nama / Kelas</th>
+                <th>Lulus</th>
+                <th>Kegiatan &amp; detail</th>
+                <th>PTN tidak diambil</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="alumniList"></tbody>
+          </table>
+          <div id="emptyMessage" class="empty" hidden>Belum ada data. Isi formulir untuk menambahkan alumni.</div>
+        </div>
+
+        <p id="syncStatus" class="privacy">
+          Data tersimpan di browser ini. Sinkronisasi Google Sheets belum diatur.
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Tempel URL Google Apps Script Web App di sini jika ingin mengirim data ke Google Sheets.
+    // Contoh: https://script.google.com/macros/s/XXXXX/exec
+    const SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzIRqgzT0o9Mc35aysRwa_ImJ4LQSeNZiTDu5a0JS-YHDo9h54VrDxt27cqXEuRCL6F/exec";
+
+    const STORAGE_KEY = "tracker-alumni-sma-v1";
+    const form = document.getElementById("alumniForm");
+    const activity = document.getElementById("kegiatan");
+
+    const detailSections = {
+      "Kuliah": document.getElementById("kuliahFields"),
+      "Kerja": document.getElementById("kerjaFields"),
+      "Sekolah kedinasan": document.getElementById("dinasFields"),
+      "AKMIL": document.getElementById("akademiFields"),
+      "AKPOL": document.getElementById("akademiFields"),
+      "Kegiatan lain": document.getElementById("lainFields")
+    };
+
+    function updateActivityFields() {
+      Object.values(detailSections).forEach(section => section.hidden = true);
+      if (detailSections[activity.value]) {
+        detailSections[activity.value].hidden = false;
+      }
+    }
+
+    activity.addEventListener("change", updateActivityFields);
+
+    const tidakDiambil = document.getElementById("tidakDiambil");
+    const ptnFields = document.getElementById("ptnFields");
+
+    tidakDiambil.addEventListener("change", () => {
+      ptnFields.hidden = !tidakDiambil.checked;
+    });
+
+    function loadRecords() {
+      try {
+        const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(records) ? records : [];
+      } catch {
+        return [];
+      }
+    }
+
+    let records = loadRecords();
+
+    function saveRecords() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function value(name) {
+      return (form.elements[name]?.value || "").trim();
+    }
+
+    function cell(text) {
+      const td = document.createElement("td");
+      td.textContent = text || "—";
+      return td;
+    }
+
+    function render() {
+      const tbody = document.getElementById("alumniList");
+      const query = document.getElementById("search").value.trim().toLowerCase();
+      tbody.replaceChildren();
+
+      const filtered = records.filter(record =>
+        Object.values(record).join(" ").toLowerCase().includes(query)
+      );
+
+      document.getElementById("count").textContent =
+        `${filtered.length} dari ${records.length} data alumni`;
+      document.getElementById("emptyMessage").hidden = filtered.length !== 0;
+
+      filtered.forEach(record => {
+        const row = document.createElement("tr");
+
+        row.append(cell(`${record.nama} — ${record.kelas}`));
+        row.append(cell(record.tahun));
+
+        const details = [
+          record.kegiatan,
+          record.universitas && `${record.universitas} • ${record.jurusanKuliah} (${record.jenjangKuliah})`,
+          record.pekerjaan && `${record.pekerjaan}${record.tempatKerja ? ` • ${record.tempatKerja}` : ""}`,
+          record.sekolahDinas && `${record.sekolahDinas} • ${record.jurusanDinas} (${record.jenjangDinas})`,
+          record.akademi && `${record.akademi} • ${record.bidangAkademi}`,
+          record.kegiatanLain,
+          record.kegiatanTambahan && `Kegiatan tambahan: ${record.kegiatanTambahan}`
+        ].filter(Boolean).join("\n");
+
+        const detailCell = cell(details);
+        detailCell.style.whiteSpace = "pre-line";
+        row.append(detailCell);
+
+        const ptnText = record.tidakDiambil
+          ? `${record.namaPTN} • ${record.jurusanPTN}\nAlasan: ${record.alasanPTN}`
+          : "—";
+        const ptnCell = cell(ptnText);
+        ptnCell.style.whiteSpace = "pre-line";
+        row.append(ptnCell);
+
+        const actionCell = document.createElement("td");
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "delete";
+        deleteButton.textContent = "Hapus";
+        deleteButton.setAttribute("aria-label", `Hapus data ${record.nama}`);
+        deleteButton.addEventListener("click", () => {
+          if (!confirm(`Hapus data ${record.nama}?`)) return;
+          records = records.filter(item => item.id !== record.id);
+          saveRecords();
+          render();
+        });
+        actionCell.append(deleteButton);
+        row.append(actionCell);
+
+        tbody.append(row);
+      });
+    }
+
+    async function syncToSheets(record) {
+      if (!SHEETS_WEB_APP_URL) return;
+
+      const status = document.getElementById("syncStatus");
+      status.textContent = "Data disimpan di browser. Mengirim data ke Google Sheets…";
+
+      try {
+        // Apps Script Web App dapat menerima JSON melalui POST.
+        // Mode no-cors berarti browser tidak dapat membaca respons server.
+        await fetch(SHEETS_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(record)
+        });
+        status.textContent = "Permintaan sinkronisasi dikirim. Periksa Google Sheets untuk memastikan data masuk.";
+      } catch {
+        status.textContent = "Data tersimpan di browser, tetapi pengiriman ke Google Sheets gagal. Periksa URL dan koneksi.";
+      }
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const record = {
+        id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+        nama: value("nama"),
+        kelas: value("kelas"),
+        tahun: value("tahun"),
+        kegiatan: value("kegiatan"),
+        universitas: value("universitas"),
+        jurusanKuliah: value("jurusanKuliah"),
+        jenjangKuliah: value("jenjangKuliah"),
+        pekerjaan: value("pekerjaan"),
+        tempatKerja: value("tempatKerja"),
+        sekolahDinas: value("sekolahDinas"),
+        jurusanDinas: value("jurusanDinas"),
+        jenjangDinas: value("jenjangDinas"),
+        akademi: value("akademi"),
+        bidangAkademi: value("bidangAkademi"),
+        kegiatanLain: value("kegiatanLain"),
+        tidakDiambil: tidakDiambil.checked,
+        namaPTN: value("namaPTN"),
+        jurusanPTN: value("jurusanPTN"),
+        alasanPTN: value("alasanPTN"),
+        kegiatanTambahan: value("kegiatanTambahan")
+      };
+
+      records.unshift(record);
+      saveRecords();
+      render();
+      syncToSheets(record);
+
+      form.reset();
+      updateActivityFields();
+      ptnFields.hidden = true;
+    });
+
+    document.getElementById("search").addEventListener("input", render);
+
+    function csvEscape(input) {
+      return `"${String(input ?? "").replaceAll('"', '""')}"`;
+    }
+
+    document.getElementById("exportButton").addEventListener("click", () => {
+      if (!records.length) {
+        alert("Belum ada data untuk diekspor.");
+        return;
+      }
+
+      const columns = [
+        ["Nama", "nama"], ["Kelas", "kelas"], ["Tahun lulus", "tahun"],
+        ["Kegiatan utama", "kegiatan"], ["Universitas", "universitas"],
+        ["Jurusan kuliah", "jurusanKuliah"], ["Jenjang kuliah", "jenjangKuliah"],
+        ["Pekerjaan", "pekerjaan"], ["Tempat kerja", "tempatKerja"],
+        ["Sekolah kedinasan", "sekolahDinas"], ["Jurusan kedinasan", "jurusanDinas"],
+        ["Jenjang kedinasan", "jenjangDinas"], ["Akademi/sekolah AKMIL/AKPOL", "akademi"],
+        ["Jurusan/bidang AKMIL/AKPOL", "bidangAkademi"], ["Kegiatan lain", "kegiatanLain"],
+        ["Tidak mengambil PTN diterima", "tidakDiambil"], ["Nama PTN", "namaPTN"],
+        ["Jurusan PTN", "jurusanPTN"], ["Alasan tidak mengambil PTN", "alasanPTN"],
+        ["Kegiatan tambahan", "kegiatanTambahan"]
+      ];
+
+      const csv = [
+        columns.map(([title]) => csvEscape(title)).join(","),
+        ...records.map(record => columns.map(([, key]) =>
+          csvEscape(key === "tidakDiambil" ? (record[key] ? "Ya" : "Tidak") : record[key])
+        ).join(","))
+      ].join("\r\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "rekap-alumni-sma.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    updateActivityFields();
+    render();
+
+    if (SHEETS_WEB_APP_URL) {
+      document.getElementById("syncStatus").textContent =
+        "Sinkronisasi Google Sheets dikonfigurasi. Data juga disimpan di browser ini.";
+    }
+  </script>
+</body>
+</html>
